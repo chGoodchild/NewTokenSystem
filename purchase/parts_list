@@ -1,18 +1,17 @@
+
+
+NOTE: This list is no longer up to date, and since I am not exactly sure what to take out and what to leave we should go over it again...
+
 element14:
 Headphone Jack
-Diode 1N4004
 ULN2003AN
-47uF cap
-10uF cap
-10K resistor
-100nF cap
 MCP1702 regulator
-2-DIP switch
 Ethernet Jacks
 HEF4543PTH
 
 Pondy:
 IC base
+2-DIP switch
 8-pin headers
 7.5V power supply
 3-pin connector
@@ -20,3 +19,10 @@ cable
 bell switch + box
 Green LEDs
 Resistors
+Diode 1N4004
+47uF cap
+10uF cap
+10K resistor
+100nF cap
+
+
