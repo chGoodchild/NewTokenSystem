@@ -1,0 +1,8 @@
+GPATH
+GRTAGS
+GTAGS
+*.o
+*~
+twi
+*-stripped
+*.srec
