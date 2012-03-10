@@ -1,0 +1,35 @@
+Initialize IO
+Initialize Timer
+Initialize TWI as Slave
+
+Loop
+	Check if Button Pressed:
+	
+		If TokenDispenser:
+			Increment upper range
+			Send update
+			Display
+
+		Else CounterModule
+			Increment lower range
+			Display
+			Send update
+		/If
+	/If
+	Check if Received Data:
+		
+		If Data UPPER_RANGE_CMD:
+			Update upper range
+		
+		Else Data CUR_NUM_CMD:
+			Update lower range
+			If GeneralStatusMonitor:
+				Display lower range
+			/If
+		
+		Else
+			Nothing
+		/If
+	
+	/If
+/Loop

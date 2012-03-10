@@ -11,7 +11,7 @@ CFLAGS  = $(OPTIMIZATION)
 
 # NOTE: Change this to match your AVR chip type.
 ifeq ($(MCU),)
-MCU         := attiny2313
+MCU         := attiny4313
 endif
 PROG_METHOD := stk500v2 # dragon_isp
 
@@ -40,6 +40,9 @@ CFLAGS += -I.
 ifeq ($(strip $(MCU)),attiny2313)
 CFLAGS         += -D__AVR_ATtiny2313__ -D__ATtiny2313__ -DF_CPU=1000000
 AVRDUDE_PARTNO  = t2313
+else ifeq ($(strip $(MCU)),attiny4313)
+CFLAGS         += -D__AVR_ATtiny4313__ -D__ATtiny4313__ -DF_CPU=1000000
+AVRDUDE_PARTNO  = t4313
 else ifeq ($(strip $(MCU)),attiny13)
 CFLAGS         += -D__AVR_ATtiny13__
 AVRDUDE_PARTNO  = t13
@@ -90,8 +93,8 @@ $(SREC): $(PROGRAM)-stripped
 
 .PHONY: program terminal
 program: $(SREC)
-	sudo $(AVRDUDE) -P $(PORT) -c $(PROG_METHOD) -p $(AVRDUDE_PARTNO) -y -e
-	sudo $(AVRDUDE) -v -P $(PORT) -c $(PROG_METHOD) -p $(AVRDUDE_PARTNO) -D -U flash:w:$(SREC)
+	sudo $(AVRDUDE) -P $(PORT) -c $(PROG_METHOD) -p $(AVRDUDE_PARTNO) -y -e -F
+	sudo $(AVRDUDE) -v -P $(PORT) -c $(PROG_METHOD) -p $(AVRDUDE_PARTNO) -D -U flash:w:$(SREC) -F
 
 terminal:
-	sudo $(AVRDUDE) -P $(PORT) -c $(PROG_METHOD) -p $(AVRDUDE_PARTNO) -t
+	sudo $(AVRDUDE) -P $(PORT) -c $(PROG_METHOD) -p $(AVRDUDE_PARTNO) -t 
