@@ -283,7 +283,7 @@ main(void)
     // when the button is pressed
     if (buttonPressed) {
       buttonPressed = false;
-      sei();
+      sei();			/* Turns on the interupts */
       
       /* if we have to run as token dispensor */
       if(mode2){
