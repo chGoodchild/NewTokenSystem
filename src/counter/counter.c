@@ -184,6 +184,18 @@ ioinit()
   mode2 = 0;
   mode2 = (PINB & _BV(6));
 
+  /* If both DIP-switches are on, stop execution of the code and
+   * flash 88 on the display to indicate an error condition. */
+  if (mode && mode2) {
+    while(1) {
+      writeDecoder(8, 8);
+      PORTD |= _BV(5);
+      __delay_ms(750);
+      PORTD &= ~_BV(5);
+      __delay_ms(750);
+    }
+  }
+
   if (mode || mode2) {             /* this is a module which requires
 				    * input from the button. */
 
@@ -300,7 +312,7 @@ main(void)
 				   and doesn't share the last token
 				   with all the other modules. This
 				   variable is needed for the PWM. */
-      }else{
+      }else if (mode){
 	/* else, we are running as a counter module */
 	
 	// make sure there are enough numbers dispensed
