@@ -190,9 +190,9 @@ ioinit()
     while(1) {
       writeDecoder(8, 8);
       PORTD |= _BV(5);
-      __delay_ms(750);
+      _delay_ms(750);
       PORTD &= ~_BV(5);
-      __delay_ms(750);
+      _delay_ms(750);
     }
   }
 
