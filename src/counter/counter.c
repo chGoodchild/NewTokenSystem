@@ -1,3 +1,4 @@
+
 /**
  * @file   counter.c
  * @author Rohit Grover, Dyuman Mezzetti, Chandran Goodchild
@@ -23,7 +24,7 @@
  * THIS SOFTWARE IS PROVIDED BY Rohit, Chandran and Dyuman ``AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL Rohit or Dyuman BE LIABLE
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL Rohit, Chandran or Dyuman BE LIABLE
  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
  * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
@@ -56,17 +57,16 @@
 #define RETRANSMIT_COUNT 25
 #define TWI_BROADCAST_ADDRESS (0x0)
 
-volatile uint8_t  token;        /* The current number that is being displayed */
 volatile uint8_t  lowerRange;	/* The latest number that has been served. */
 volatile uint8_t  upperRange;   /* The last number that was dispensed. */
-volatile uint8_t  mode;
-volatile uint8_t  mode2;        /* mode variables */
+uint8_t  mode;
+uint8_t  mode2;        /* mode variables */
 volatile bool     buttonPressed = false;
 volatile uint32_t ticks;
 volatile uint32_t buttonPressSnapshot;
-volatile uint8_t  lastToken;           /* the number that we displayed
-					* last, (previous number for
-					* the PWM). */
+volatile uint8_t  lastToken;    /* the number that we displayed
+				 * last, (previous number for
+				 * the PWM). */
 
 
 ISR(TIMER0_OVF_vect)
@@ -266,21 +266,9 @@ displayNumber(uint8_t currentNumber, uint8_t lastNumber)
   writeDecoder(tens, unit);
 }
 
-/* This is a piece of that was repeated often in the code
- * so it has been put in a separate function to make the
- * code size smaller and be able to fit the code onto the MCU. */
-void shortenCode(){
-  // if all the variables have reached the limit, go back to 0.
-  if(token > 99 & lowerRange > 99 & upperRange > 99){
-    token = lowerRange = 0;
-    upperRange = upperRange -100;
-  }
-}
-
 int
 main(void)
 {
-  token = 0;
   lowerRange = 0;
   upperRange = 0;
 
@@ -299,35 +287,31 @@ main(void)
       
       /* if we have to run as token dispensor */
       if(mode2){
-	upperRange++;          // increment the upperRange
-	shortenCode();         // remember that we should NEVER go over 99
+	lastToken = upperRange;	               /* save the current number for
+						*  use with PWM */
 	
-	sendUpdateUpperRange(upperRange); // broadcast the update to everyone
-	
-	// display the number
-	displayNumber(upperRange, lastToken);
-		
-	lastToken = upperRange;	/* This won't make trouble because
-				   each module has it's own last token
-				   and doesn't share the last token
-				   with all the other modules. This
-				   variable is needed for the PWM. */
+	upperRange++;                          /* increment the
+						* lowerRange... */          
+
+	displayNumber(upperRange, lastToken);  /* update the display */
+
+	sendUpdateUpperRange(upperRange);      /* Also update every other
+						* module on the bus*/
       }else if (mode){
 	/* else, we are running as a counter module */
 	
 	// make sure there are enough numbers dispensed
 	if(upperRange > lowerRange){
-	  lastToken = token;               /* save the current number for use 
-					    * with PWM */
-	  lowerRange++;                    /* increment the lowerRange... */
-	  token = lowerRange;              /* ...and also the currently
-					    * displayed number */
+	  lastToken = lowerRange;               /* save the current number for
+						 *  use with PWM */
+
+	  lowerRange++;                         /* increment the
+						 * lowerRange... */
 	  
-	  shortenCode();                   /* remember we should not go over
-					    * 99 */
-	  displayNumber(token, lastToken); /* update the display */
-	  sendUpdate(token);               /* Also update every other
-					    * module on the bus*/
+	  displayNumber(lowerRange, lastToken); /* update the display */
+
+	  sendUpdate(lowerRange);               /* Also update every other
+						 * module on the bus*/
 	}
       }
     }
@@ -369,4 +353,3 @@ main(void)
   /* we will never come here. */
   return (0);
 }
-
