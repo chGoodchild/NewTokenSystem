@@ -38,7 +38,7 @@ typedef     unsigned char       uint8_t;
 //////////////////////////////////////////////////////////////////
 // 1,2,4,8,16,32,64,128 or 256 bytes are allowed buffer sizes
 
-#define TWI_RX_BUFFER_SIZE  (16)
+#define TWI_RX_BUFFER_SIZE  (32)
 #define TWI_RX_BUFFER_MASK ( TWI_RX_BUFFER_SIZE - 1 )
 
 #if ( TWI_RX_BUFFER_SIZE & TWI_RX_BUFFER_MASK )
@@ -47,7 +47,7 @@ typedef     unsigned char       uint8_t;
 
 // 1,2,4,8,16,32,64,128 or 256 bytes are allowed buffer sizes
 
-#define TWI_TX_BUFFER_SIZE  (16)
+#define TWI_TX_BUFFER_SIZE  (32)
 #define TWI_TX_BUFFER_MASK ( TWI_TX_BUFFER_SIZE - 1 )
 
 #if ( TWI_TX_BUFFER_SIZE & TWI_TX_BUFFER_MASK )
