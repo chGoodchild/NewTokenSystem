@@ -178,19 +178,20 @@ main(void)
     /* all devices initialize themselves as slaves */
     USI_TWI_Slave_Initialise(TWI_BROADCAST_ADDRESS);
 
-    /* This is for testing the UART */
+#if WE_NEED_TO_TEST_UART        /* for debugging only */
     uint8_t counter = 0;
     while (true) {
         ++counter;
         sendUart('a' + (counter % 26));
         _delay_ms(1000);
     }
+#endif /* #if WE_NEED_TO_TEST_UART */
 
-    /* /\* loop forever *\/ */
-    /* for (;; ) { */
-    /*     uint8_t byte = USI_TWI_Receive_Byte(); */
-    /*     sendUart(byte); */
-    /* } */
+    /* loop forever */
+    for (;; ) {
+        uint8_t byte = USI_TWI_Receive_Byte();
+        sendUart(byte);
+    }
 
     /* we will never come here. */
     return (0);
