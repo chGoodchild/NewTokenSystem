@@ -1,1 +1,4 @@
 counter
+counter-stripped
+counter.o
+counter.srec
