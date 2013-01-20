@@ -95,6 +95,7 @@ ISR(INT1_vect)
         buttonPressSnapshot = TIMER_SNAPSHOT_MS();
         buttonPressed       = true;
     }
+    sei();
 }
 
 /* Inform the other modules that we are now serving currentNumber */
@@ -271,7 +272,6 @@ main(void)
         // when the button is pressed
         if (buttonPressed) {
             buttonPressed = false;
-            sei();
 
             /* if we have to run as token dispensor */
             if (mode2) {
