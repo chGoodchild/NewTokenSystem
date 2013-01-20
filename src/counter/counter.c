@@ -98,7 +98,7 @@ ISR(INT1_vect)
 }
 
 /* Inform the other modules that we are now serving currentNumber */
-void
+bool
 sendUpdate(CommandType cmd, uint8_t number)
 {
     USI_TWI_Master_Initialise();
@@ -110,12 +110,23 @@ sendUpdate(CommandType cmd, uint8_t number)
     buffer[1] = (uint8_t)cmd;
     buffer[2] = number;
 
+    bool transmitted = false;
     for (int i = 0; i < CMD_RETRANSMIT_COUNT; i++) {
-        USI_TWI_Start_Transceiver_With_Data(buffer, sizeof(buffer));
+        if (USI_TWI_Start_Transceiver_With_Data(buffer, sizeof(buffer))) {
+            transmitted = true; /* transmitted at least once */
+        } else {
+            if (USI_TWI_Get_State_Info() == USI_TWI_UE_DATA_COL) {
+                return (false); /* we've noticed a transmit collision;
+                                 * this arises when two distinct
+                                 * masters attempt to send on the I2C
+                                 * at the same time. */
+            }
+        }
     }
 
     /* reinitialize ourself as a slave */
     USI_TWI_Slave_Initialise(TWI_BROADCAST_ADDRESS);
+    return (transmitted);
 }
 
 /* This function writes to the display decoders. */
