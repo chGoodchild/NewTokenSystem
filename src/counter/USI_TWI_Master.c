@@ -164,7 +164,10 @@ unsigned char USI_TWI_Start_Transceiver_With_Data( unsigned char *msg, unsigned 
       /* Write a byte */
       PORT_USI &= ~(1<<PIN_USI_SCL);                // Pull SCL LOW.
       USIDR     = *(msg++);                        // Setup data.
-      USI_TWI_Master_Transfer( tempUSISR_8bit );    // Send 8 bits on bus.
+      if (USI_TWI_Master_Transfer( tempUSISR_8bit ) != tempUSISR_8bit) {
+          USI_TWI_state.errorState = USI_TWI_UE_DATA_COL;
+          return (FALSE);          
+      }
 
       /* Clock and verify (N)ACK from slave */
       DDR_USI  &= ~(1<<PIN_USI_SDA);                // Enable SDA as input.
