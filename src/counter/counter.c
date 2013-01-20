@@ -60,16 +60,15 @@ typedef enum {
 
 #define TWI_BROADCAST_ADDRESS (0x0)
 
-volatile uint8_t  lowerRange;	/* The latest number that has been served. */
-volatile uint8_t  upperRange;   /* The last number that was dispensed. */
+uint8_t  lowerRange;     /* The latest number that has been served. */
+uint8_t  upperRange;     /* The last number that was dispensed. */
 uint8_t  mode;
-uint8_t  mode2;        /* mode variables */
+uint8_t  mode2;                 /* mode variables */
 volatile bool     buttonPressed = false;
 volatile uint32_t ticks;
 volatile uint32_t buttonPressSnapshot;
-volatile uint8_t  lastToken;    /* the number that we displayed
-				 * last, (previous number for
-				 * the PWM). */
+uint8_t  lastToken;    /* the number that we displayed last, (previous
+                        * number for the PWM). */
 
 
 ISR(TIMER0_OVF_vect)
