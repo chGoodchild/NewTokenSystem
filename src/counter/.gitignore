@@ -2,3 +2,5 @@ counter
 counter-stripped
 counter.o
 counter.srec
+USI_TWI_Master.o
+USI_TWI_Slave.o
