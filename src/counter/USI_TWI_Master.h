@@ -120,18 +120,6 @@
 #define TRUE  1
 #define FALSE 0
 
-union USI_TWI_state
-{
-  unsigned char errorState;         // Can reuse the TWI_state for error states due to that it will not be need if there exists an error.
-  struct
-  {
-    unsigned char addressMode         : 1;
-    unsigned char masterWriteDataMode : 1;
-    unsigned char unused              : 6;
-  };
-};
-extern union USI_TWI_state USI_TWI_state;
-
 //********** Prototypes **********//
 
 void          USI_TWI_Master_Initialise( void );
