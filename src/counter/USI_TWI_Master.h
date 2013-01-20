@@ -51,7 +51,11 @@
 
 // Defines controling code generating
 //#define PARAM_VERIFICATION
-//#define NOISE_TESTING
+#define NOISE_TESTING 1         /* Enable detection of I2C
+                                 * collisions. This may happen if two
+                                 * distinct modules decide to become
+                                 * masters at nearly the same time and
+                                 * transmit conflicting messages. */
 //#define SIGNAL_VERIFY
 
 //USI_TWI messages and flags and bit masks
@@ -118,6 +122,6 @@
 
 //********** Prototypes **********//
 
-void              USI_TWI_Master_Initialise( void );
+void          USI_TWI_Master_Initialise( void );
 unsigned char USI_TWI_Start_Transceiver_With_Data( unsigned char * , unsigned char );
 unsigned char USI_TWI_Get_State_Info( void );
