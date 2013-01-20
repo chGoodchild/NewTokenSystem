@@ -55,7 +55,7 @@ typedef enum {
     CUR_NUM_CMD     = (uint8_t)0xF2,
     UPPER_RANGE_CMD = (uint8_t)0xF3
 } CommandType;
-#define CMD_SIZE             3
+#define CMD_SIZE             4
 #define CMD_RETRANSMIT_COUNT 2
 
 #define TWI_BROADCAST_ADDRESS (0x0)
@@ -98,9 +98,26 @@ ISR(INT1_vect)
     sei();
 }
 
-/* Inform the other modules that we are now serving currentNumber */
+/**
+ * Broadcast a command to all peers on the I2C bus.
+ *
+ * @param[in] cmd
+ * @param[in] prevNumber
+ *                The previous value of the token. This is sent out
+ *                only to cause messages to be unique; it helps
+ *                generate collisions.
+ * @param[in] newNumber
+ *                The actual new value of the token based on the command.
+ *
+ * @return
+ *     'true' if at least one of the broadcasts was successful. The
+ *     typical cause for failure would be a multi-master collision in
+ *     the case where multiple counter modules decide to send their
+ *     counter updates at the same time; i.e. if their buttons are
+ *     pressed at roughly the same time.
+ */
 bool
-sendUpdate(CommandType cmd, uint8_t number)
+sendUpdate(CommandType cmd, uint8_t prevNumber, uint8_t newNumber)
 {
     USI_TWI_Master_Initialise();
 
@@ -109,7 +126,18 @@ sendUpdate(CommandType cmd, uint8_t number)
         (TWI_BROADCAST_ADDRESS << TWI_ADR_BITS) | /* address */
         (FALSE << TWI_READ_BIT); /* write operation */
     buffer[1] = (uint8_t)cmd;
-    buffer[2] = number;
+    buffer[2] = prevNumber;     /* we send the previous number only to
+                                 * generate a collision in the case
+                                 * where multiple counter-modules
+                                 * choose to send out the CUR_NUM
+                                 * command at the same time. These
+                                 * different counter modules will
+                                 * certainly have distinct values for
+                                 * prevNumber; so their transmissions
+                                 * would *not* be idential and would
+                                 * cause a collision-detection in the
+                                 * I2C driver. */
+    buffer[3] = newNumber;
 
     bool transmitted = false;
     for (int i = 0; i < CMD_RETRANSMIT_COUNT; i++) {
@@ -281,7 +309,7 @@ main(void)
                     upperRange = 0;
                 }
 
-                if (sendUpdate(UPPER_RANGE_CMD, upperRange)) { /* we
+                if (sendUpdate(UPPER_RANGE_CMD, lastToken, upperRange)) { /* we
                                         * were able to send an update
                                         * successfully over I2C; we
                                         * can update the display. */
@@ -304,7 +332,7 @@ main(void)
                         lowerRange = 0;
                     }
 
-                    if (sendUpdate(CUR_NUM_CMD, lowerRange)) { /* we
+                    if (sendUpdate(CUR_NUM_CMD, lastToken, lowerRange)) { /* we
                                          * were able to send an update
                                          * successfully over I2C; we
                                          * can update the display. */
@@ -330,6 +358,8 @@ main(void)
 
                 // if we received a last served number update
             case CUR_NUM_CMD:
+                USI_TWI_Receive_Byte(); /* read the previous value;
+                                         * but this is of no use. */
                 lowerRange = USI_TWI_Receive_Byte();
 
                 /* If general status monitor mode */
@@ -341,6 +371,8 @@ main(void)
 
                 // if we received a last dispensed number update
             case UPPER_RANGE_CMD:
+                USI_TWI_Receive_Byte(); /* read the previous value;
+                                         * but this is of no use. */
                 upperRange = USI_TWI_Receive_Byte();
                 break;
 
