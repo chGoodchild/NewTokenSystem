@@ -269,36 +269,54 @@ main(void)
 
     /* loop forever */
     for (;; ) {
-        // when the button is pressed
         if (buttonPressed) {
             buttonPressed = false;
 
-            /* if we have to run as token dispensor */
-            if (mode2) {
+            if (mode2) {    /* if we have to run as token dispensor */
                 lastToken = upperRange; /* save the current number for
                                          * use with PWM */
 
-                upperRange++;
+                ++upperRange;
+                if (upperRange == 100) {
+                    upperRange = 0;
+                }
 
-                displayNumber(upperRange, lastToken);  /* update the display */
+                if (sendUpdate(UPPER_RANGE_CMD, upperRange)) { /* we
+                                        * were able to send an update
+                                        * successfully over I2C; we
+                                        * can update the display. */
+                    displayNumber(upperRange, lastToken);
+                } else {        /* There was a problem with sending
+                                 * the update; we need to rollback the
+                                 * value of upperRange and handle
+                                 * button press event again in a
+                                 * subsequent iteration. */
+                    upperRange    = lastToken;
+                    buttonPressed = true;
+                }
+            } else if (mode) { /* else, we are running as a counter module */
+                if (upperRange != lowerRange) {
+                    lastToken = lowerRange; /* save the current number
+                                             * for use with PWM */
 
-                sendUpdate(UPPER_RANGE_CMD, upperRange); /* Also update every other
-                                                        * module on the bus*/
-            } else if (mode) {
-                /* else, we are running as a counter module */
+                    ++lowerRange;
+                    if (lowerRange == 100) {
+                        lowerRange = 0;
+                    }
 
-                // make sure there are enough numbers dispensed
-                if (upperRange > lowerRange){
-                    lastToken = lowerRange;               /* save the current number for
-                                                           *  use with PWM */
-
-                    lowerRange++;                         /* increment the
-                                                           * lowerRange... */
-
-                    displayNumber(lowerRange, lastToken); /* update the display */
-
-                    sendUpdate(CUR_NUM_CMD, lowerRange); /* Also update every other
-                                                           * module on the bus*/
+                    if (sendUpdate(CUR_NUM_CMD, lowerRange)) { /* we
+                                         * were able to send an update
+                                         * successfully over I2C; we
+                                         * can update the display. */
+                        displayNumber(lowerRange, lastToken);
+                    } else {    /* There was a problem with sending
+                                 * the update; we need to rollback the
+                                 * value of lowerRange and handle
+                                 * button press event again in a
+                                 * subsequent iteration. */
+                        lowerRange    = lastToken;
+                        buttonPressed = true;
+                    }
                 }
             }
         }
