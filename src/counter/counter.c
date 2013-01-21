@@ -126,17 +126,18 @@ sendUpdate(CommandType cmd, uint8_t prevNumber, uint8_t newNumber)
         (TWI_BROADCAST_ADDRESS << TWI_ADR_BITS) | /* address */
         (FALSE << TWI_READ_BIT); /* write operation */
     buffer[1] = (uint8_t)cmd;
-    buffer[2] = prevNumber;     /* we send the previous number only to
-                                 * generate a collision in the case
-                                 * where multiple counter-modules
-                                 * choose to send out the CUR_NUM
-                                 * command at the same time. These
-                                 * different counter modules will
-                                 * certainly have distinct values for
-                                 * prevNumber; so their transmissions
-                                 * would *not* be idential and would
-                                 * cause a collision-detection in the
-                                 * I2C driver. */
+    buffer[2] = prevNumber;     /* We send the previous number along
+             * with the command to make every broadcast unique--if we
+             * did not do so then there would be no difference in the
+             * transmissions between two counter moudules wanting to
+             * update the current-token at nearly the same time.
+             *
+             * Sending the previous number is like sending the
+             * identity of the transmitter; and it helps generate
+             * collisions when multiple counter-modules choose to send
+             * out the CUR_NUM command at the same time. Collisions
+             * can be detected by all but one of the transmitters; and
+             * hence all but one of them back off and retry later. */
     buffer[3] = newNumber;
 
     bool transmitted = false;
@@ -144,11 +145,13 @@ sendUpdate(CommandType cmd, uint8_t prevNumber, uint8_t newNumber)
         if (USI_TWI_Start_Transceiver_With_Data(buffer, sizeof(buffer))) {
             transmitted = true; /* transmitted at least once */
         } else {
-            if (USI_TWI_Get_State_Info() == USI_TWI_UE_DATA_COL) {
+            if (COLLISION_DETECTED()) {
                 return (false); /* we've noticed a transmit collision;
-                                 * this arises when two distinct
-                                 * masters attempt to send on the I2C
-                                 * at the same time. */
+                     * this arises when two distinct masters attempt
+                     * to send on the I2C at the same time. All but
+                     * one of the colliding transmitters will notice
+                     * the collision and return false from this
+                     * function. */
             }
         }
     }

@@ -125,3 +125,5 @@
 void          USI_TWI_Master_Initialise( void );
 unsigned char USI_TWI_Start_Transceiver_With_Data( unsigned char * , unsigned char );
 unsigned char USI_TWI_Get_State_Info( void );
+
+#define COLLISION_DETECTED() (USI_TWI_Get_State_Info() == USI_TWI_UE_DATA_COL)
