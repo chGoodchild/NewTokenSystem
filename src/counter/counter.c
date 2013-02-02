@@ -300,94 +300,97 @@ main(void)
 
     /* loop forever */
     for (;; ) {
-        if (buttonPressed) {
-            buttonPressed = false;
+        sendUpdate(UPPER_RANGE_CMD, 0, 0);
+        _delay_ms(1000);
 
-            if (mode2) {    /* if we have to run as token dispensor */
-                lastToken = upperRange; /* save the current number for
-                                         * use with PWM */
+        /* if (buttonPressed) { */
+        /*     buttonPressed = false; */
 
-                ++upperRange;
-                if (upperRange == 100) {
-                    upperRange = 0;
-                }
+        /*     if (mode2) {    /\* if we have to run as token dispensor *\/ */
+        /*         lastToken = upperRange; /\* save the current number for */
+        /*                                  * use with PWM *\/ */
 
-                if (sendUpdate(UPPER_RANGE_CMD, lastToken, upperRange)) { /* we
-                                        * were able to send an update
-                                        * successfully over I2C; we
-                                        * can update the display. */
-                    displayNumber(upperRange, lastToken);
-                } else {        /* There was a problem with sending
-                                 * the update; we need to rollback the
-                                 * value of upperRange and handle
-                                 * button press event again in a
-                                 * subsequent iteration. */
-                    upperRange    = lastToken;
-                    buttonPressed = true;
-                }
-            } else if (mode) { /* else, we are running as a counter module */
-                if (upperRange != lowerRange) {
-                    lastToken = lowerRange; /* save the current number
-                                             * for use with PWM */
+        /*         ++upperRange; */
+        /*         if (upperRange == 100) { */
+        /*             upperRange = 0; */
+        /*         } */
 
-                    ++lowerRange;
-                    if (lowerRange == 100) {
-                        lowerRange = 0;
-                    }
+        /*         if (sendUpdate(UPPER_RANGE_CMD, lastToken, upperRange)) { /\* we */
+        /*                                 * were able to send an update */
+        /*                                 * successfully over I2C; we */
+        /*                                 * can update the display. *\/ */
+        /*             displayNumber(upperRange, lastToken); */
+        /*         } else {        /\* There was a problem with sending */
+        /*                          * the update; we need to rollback the */
+        /*                          * value of upperRange and handle */
+        /*                          * button press event again in a */
+        /*                          * subsequent iteration. *\/ */
+        /*             upperRange    = lastToken; */
+        /*             buttonPressed = true; */
+        /*         } */
+        /*     } else if (mode) { /\* else, we are running as a counter module *\/ */
+        /*         if (upperRange != lowerRange) { */
+        /*             lastToken = lowerRange; /\* save the current number */
+        /*                                      * for use with PWM *\/ */
 
-                    if (sendUpdate(CUR_NUM_CMD, lastToken, lowerRange)) { /* we
-                                         * were able to send an update
-                                         * successfully over I2C; we
-                                         * can update the display. */
-                        displayNumber(lowerRange, lastToken);
-                    } else {    /* There was a problem with sending
-                                 * the update; we need to rollback the
-                                 * value of lowerRange and handle
-                                 * button press event again in a
-                                 * subsequent iteration. */
-                        lowerRange    = lastToken;
-                        buttonPressed = true;
-                    }
-                }
-            }
-        }
+        /*             ++lowerRange; */
+        /*             if (lowerRange == 100) { */
+        /*                 lowerRange = 0; */
+        /*             } */
 
-        if (USI_TWI_Data_In_Receive_Buffer()) { /* have
-                                                 * we received anything
-                                                 * over TWI? */
+        /*             if (sendUpdate(CUR_NUM_CMD, lastToken, lowerRange)) { /\* we */
+        /*                                  * were able to send an update */
+        /*                                  * successfully over I2C; we */
+        /*                                  * can update the display. *\/ */
+        /*                 displayNumber(lowerRange, lastToken); */
+        /*             } else {    /\* There was a problem with sending */
+        /*                          * the update; we need to rollback the */
+        /*                          * value of lowerRange and handle */
+        /*                          * button press event again in a */
+        /*                          * subsequent iteration. *\/ */
+        /*                 lowerRange    = lastToken; */
+        /*                 buttonPressed = true; */
+        /*             } */
+        /*         } */
+        /*     } */
+        /* } */
 
-            uint8_t command = USI_TWI_Receive_Byte();
-            switch (command) {
+        /* if (USI_TWI_Data_In_Receive_Buffer()) { /\* have */
+        /*                                          * we received anything */
+        /*                                          * over TWI? *\/ */
 
-                // if we received a last served number update
-            case CUR_NUM_CMD:
-                USI_TWI_Receive_Byte(); /* read the previous value;
-                                         * but this is of no use. */
-                lowerRange = USI_TWI_Receive_Byte();
+        /*     uint8_t command = USI_TWI_Receive_Byte(); */
+        /*     switch (command) { */
 
-                /* If general status monitor mode */
-                if (!mode && !mode2) {
-                    displayNumber(lowerRange, lastToken);
-                    lastToken = lowerRange;
-                }
-                break;
+        /*         // if we received a last served number update */
+        /*     case CUR_NUM_CMD: */
+        /*         USI_TWI_Receive_Byte(); /\* read the previous value; */
+        /*                                  * but this is of no use. *\/ */
+        /*         lowerRange = USI_TWI_Receive_Byte(); */
 
-                // if we received a last dispensed number update
-            case UPPER_RANGE_CMD:
-                USI_TWI_Receive_Byte(); /* read the previous value;
-                                         * but this is of no use. */
-                upperRange = USI_TWI_Receive_Byte();
-                break;
+        /*         /\* If general status monitor mode *\/ */
+        /*         if (!mode && !mode2) { */
+        /*             displayNumber(lowerRange, lastToken); */
+        /*             lastToken = lowerRange; */
+        /*         } */
+        /*         break; */
 
-            default:
-                /* Unexpected communication. consume everything we've
-                 * received */
-                while (USI_TWI_Data_In_Receive_Buffer()) {
-                    USI_TWI_Receive_Byte();
-                }
-                break;
-            }
-        }
+        /*         // if we received a last dispensed number update */
+        /*     case UPPER_RANGE_CMD: */
+        /*         USI_TWI_Receive_Byte(); /\* read the previous value; */
+        /*                                  * but this is of no use. *\/ */
+        /*         upperRange = USI_TWI_Receive_Byte(); */
+        /*         break; */
+
+        /*     default: */
+        /*         /\* Unexpected communication. consume everything we've */
+        /*          * received *\/ */
+        /*         while (USI_TWI_Data_In_Receive_Buffer()) { */
+        /*             USI_TWI_Receive_Byte(); */
+        /*         } */
+        /*         break; */
+        /*     } */
+        /* } */
     }
 
     /* we will never come here. */
